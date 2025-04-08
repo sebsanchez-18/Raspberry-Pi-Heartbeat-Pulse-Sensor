@@ -1,17 +1,18 @@
 from pulsesensor import Pulsesensor
 import time
 
-# Create an instance of Pulsesensor.
-sensor = Pulsesensor(channel=0, address=0x48)
+def main():
+    sensor = Pulsesensor(channel=0, address=0x48)
+    sensor.startAsyncBPM()
 
-# Start the BPM measurement asynchronously.
-sensor.startAsyncBPM()
+    try:
+        while True:
+            # Print the current BPM value every second.
+            print("Current BPM from main loop:", sensor.BPM, flush=True)
+            time.sleep(1)
+    except KeyboardInterrupt:
+        sensor.stopAsyncBPM()
+        print("Stopped BPM measurement.", flush=True)
 
-try:
-    while True:
-        # Print the current BPM once per second.
-        print("Current BPM from main loop:", sensor.BPM)
-        time.sleep(1)
-except KeyboardInterrupt:
-    sensor.stopAsyncBPM()
-    print("Stopped BPM measurement.")
+if __name__ == '__main__':
+    main()
