@@ -39,6 +39,7 @@ class ADS1015Interface:
 
         :return: Voltage reading from the channel.
         """
+        print("test1")
         return self.chan.voltage
 
     def close(self):
