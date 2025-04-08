@@ -2,7 +2,7 @@ import time
 import threading
 import board
 import busio
-import adafruit_ads1x15.ads1015 as ADS  # Import the module as ADS
+import adafruit_ads1x15.ads1015 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
 class Pulsesensor:
@@ -19,8 +19,12 @@ class Pulsesensor:
 
         if self.i2c:
             # Wait until the I2C bus is locked before proceeding
+            timeout = time.time() + 5  # 5-second timeout
             while not self.i2c.try_lock():
-                pass
+                if time.time() > timeout:
+                    print("Error: I2C bus lock timeout.", flush=True)
+                    self.i2c = None
+                    break
             time.sleep(0.1)  # Allow the bus to settle
 
             try:
@@ -33,41 +37,11 @@ class Pulsesensor:
                 print("Error initializing ADS1015:", e, flush=True)
                 self.ads = None
                 self.chan = None
-            self.i2c.unlock()
+            finally:
+                self.i2c.unlock()
         else:
             print("I2C not initialized properly.", flush=True)
             self.ads = None
             self.chan = None
 
         self._stop_event = threading.Event()
-        print("Pulsesensor initialized.", flush=True)
-
-    def getBPMLoop(self):
-        print("Entering getBPMLoop...", flush=True)
-        # Dummy loop: updates BPM (voltage * 10) every 0.1 second.
-        while not self._stop_event.is_set():
-            if self.chan is not None:
-                try:
-                    voltage = self.chan.voltage
-                except Exception as e:
-                    print("Error reading voltage:", e, flush=True)
-                    voltage = 0
-            else:
-                voltage = 0
-            self.BPM = voltage * 10  # Dummy calculation; replace with actual BPM logic.
-            print(f"Voltage: {voltage:.2f} V, Dummy BPM: {self.BPM:.1f}", flush=True)
-            time.sleep(0.1)
-
-    def startAsyncBPM(self):
-        self._stop_event.clear()
-        self.thread = threading.Thread(target=self.getBPMLoop)
-        # Mark the thread as daemon so it will not block program exit.
-        self.thread.daemon = True
-        self.thread.start()
-        print("Async BPM thread started.", flush=True)
-    
-    def stopAsyncBPM(self):
-        self._stop_event.set()
-        self.thread.join()
-        self.BPM = 0
-        print("Async BPM thread stopped.", flush=True)
