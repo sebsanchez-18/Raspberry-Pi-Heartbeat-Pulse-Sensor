@@ -1,22 +1,17 @@
 from pulsesensor import Pulsesensor
 import time
 
-def main():
-    p = Pulsesensor()
-    p.startAsyncBPM()
-    
-    try:
-        while True:
-            bpm = p.BPM
-            if bpm > 0:
-                print("BPM: {}".format(bpm))
-            else:
-                print("No Heartbeat found")
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("Interrupted by user.")
-    finally:
-        p.stopAsyncBPM()
+# Create an instance of Pulsesensor.
+sensor = Pulsesensor(channel=0, address=0x48)
 
-if __name__ == '__main__':
-    main()
+# To run the BPM loop asynchronously:
+sensor.startAsyncBPM()
+
+try:
+    while True:
+        # Access sensor.BPM updated in the background thread.
+        print("Current BPM:", sensor.BPM)
+        time.sleep(1)
+except KeyboardInterrupt:
+    sensor.stopAsyncBPM()
+    print("Stopped BPM measurement.")
