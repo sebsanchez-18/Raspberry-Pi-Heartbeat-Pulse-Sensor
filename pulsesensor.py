@@ -1,9 +1,6 @@
 import time
 import threading
-import board
-import busio
-import adafruit_ads1x15.ads1015 as ADS
-from adafruit_ads1x15.analog_in import AnalogIn
+from ADS1015_helper import ADS1015Interface  # Import the helper class
 
 class Pulsesensor:
     def __init__(self, channel=0, address=0x48):
@@ -11,37 +8,36 @@ class Pulsesensor:
         self.BPM = 0
 
         try:
-            # Initialize I2C bus
-            self.i2c = busio.I2C(board.SCL, board.SDA)
+            # Use the ADS1015Interface from ADS1015_helper.py
+            self.adc = ADS1015Interface(address=address, channel=channel)
+            print("ADS1015 initialized successfully.", flush=True)
         except Exception as e:
-            print("Error initializing I2C:", e, flush=True)
-            self.i2c = None
-
-        if self.i2c:
-            # Wait until the I2C bus is locked before proceeding
-            timeout = time.time() + 5  # 5-second timeout
-            while not self.i2c.try_lock():
-                if time.time() > timeout:
-                    print("Error: I2C bus lock timeout.", flush=True)
-                    self.i2c = None
-                    break
-            time.sleep(0.1)  # Allow the bus to settle
-
-            try:
-                # Initialize the ADS1015 at the specified address (default 0x48)
-                self.ads = ADS.ADS1015(self.i2c, address=address)
-                self.ads.gain = 1
-                # Access the module-level channel constant (e.g. ADS.P0)
-                self.chan = AnalogIn(self.ads, getattr(ADS, f'P{channel}'))
-            except Exception as e:
-                print("Error initializing ADS1015:", e, flush=True)
-                self.ads = None
-                self.chan = None
-            finally:
-                self.i2c.unlock()
-        else:
-            print("I2C not initialized properly.", flush=True)
-            self.ads = None
-            self.chan = None
+            print("Error initializing ADS1015Interface:", e, flush=True)
+            self.adc = None
 
         self._stop_event = threading.Event()
+
+    def getBPMLoop(self):
+        """Continuously read voltage and calculate BPM."""
+        while not self._stop_event.is_set():
+            if self.adc:
+                try:
+                    voltage = self.adc.voltage()  # Use the helper's voltage method
+                    self.BPM = voltage * 10  # Dummy calculation; replace with actual logic
+                    print(f"Voltage: {voltage:.3f} V, BPM: {self.BPM:.1f}", flush=True)
+                except Exception as e:
+                    print("Error reading voltage:", e, flush=True)
+            time.sleep(0.1)
+
+    def startAsyncBPM(self):
+        """Start the BPM calculation loop in a separate thread."""
+        self._stop_event.clear()
+        self.thread = threading.Thread(target=self.getBPMLoop)
+        self.thread.daemon = True
+        self.thread.start()
+
+    def stopAsyncBPM(self):
+        """Stop the BPM calculation loop."""
+        self._stop_event.set()
+        self.thread.join()
+        self.BPM = 0
