@@ -1,6 +1,7 @@
 from adafruit_ads1x15.analog_in import AnalogIn
 import adafruit_ads1x15.ads1015 as ADS
-
+import board
+import busio
 class ADS1015Interface:
     def __init__(self, address=0x48, channel=0):
         # Initialize the I2C bus and ADS1015
