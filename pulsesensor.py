@@ -1,7 +1,7 @@
 import time
 import threading
 from ADS1015_helper import ADS1015Interface  # Import the helper class
-import matplotlib as ptl
+
 class Pulsesensor:
     def __init__(self, channel=0, address=0x48):
         self.channel = channel
@@ -24,13 +24,6 @@ class Pulsesensor:
                 try:
                     voltage = self.adc.voltage()  # Use the helper's voltage method
                     self.BPM = voltage * 10  # Dummy calculation; replace with actual logic
-                    plt.plot(time, voltage, label="Voltage vs Time")  # Plot voltage as a function of time
-                    plt.xlabel("Time (s)")  # Label for x-axis
-                    plt.ylabel("Voltage (V)")  # Label for y-axis
-                    plt.title("Voltage as a Function of Time")  # Title of the graph
-                    plt.legend()  # Add a legend
-                    plt.grid(True)  # Add a grid for better readability
-                    plt.show()  # Display the plot
                     print(f"Voltage: {voltage:.3f} V, BPM: {self.BPM:.1f}", flush=True)
                 except Exception as e:
                     print("Error reading voltage:", e, flush=True)
