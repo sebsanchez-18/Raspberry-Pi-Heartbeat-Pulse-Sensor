@@ -1,6 +1,6 @@
 import time
 import threading
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # Import matplotlib for plotting
 from ADS1015_helper import ADS1015Interface  # Import the helper class
 
 class Pulsesensor:
