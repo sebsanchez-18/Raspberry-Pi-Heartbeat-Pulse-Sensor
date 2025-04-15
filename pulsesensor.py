@@ -24,7 +24,7 @@ class Pulsesensor:
                 try:
                     voltage = self.adc.voltage()  # Use the helper's voltage method
                     self.BPM = voltage * 10  # Dummy calculation; replace with actual logic
-                    ""ptl.plot(voltage, self.BPM)  # Plotting the voltage and BPM""
+                    """ptl.plot(voltage, self.BPM)  # Plotting the voltage and BPM"""
                     print(f"Voltage: {voltage:.3f} V, BPM: {self.BPM:.1f}", flush=True)
                 except Exception as e:
                     print("Error reading voltage:", e, flush=True)
