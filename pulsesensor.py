@@ -1,7 +1,7 @@
 import time
 import threading
 from ADS1015_helper import ADS1015Interface  # Import the helper class
-import matplotlib as plt
+import matplotlib as ptl
 class Pulsesensor:
     def __init__(self, channel=0, address=0x48):
         self.channel = channel
