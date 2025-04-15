@@ -1,7 +1,7 @@
 import time
 import threading
 from ADS1015_helper import ADS1015Interface  # Import the helper class
-
+import matplotlib as plt
 class Pulsesensor:
     def __init__(self, channel=0, address=0x48):
         self.channel = channel
@@ -24,6 +24,7 @@ class Pulsesensor:
                 try:
                     voltage = self.adc.voltage()  # Use the helper's voltage method
                     self.BPM = voltage * 10  # Dummy calculation; replace with actual logic
+                    ptl.plot(voltage, self.BPM)  # Plotting the voltage and BPM
                     print(f"Voltage: {voltage:.3f} V, BPM: {self.BPM:.1f}", flush=True)
                 except Exception as e:
                     print("Error reading voltage:", e, flush=True)
